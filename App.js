@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FontAwesome } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const TicTacToe = () => {
@@ -79,9 +80,11 @@ const TicTacToe = () => {
       [0, 1, 2],
       [3, 4, 5],
       [6, 7, 8],
+
       [0, 3, 6],
       [1, 4, 7],
       [2, 5, 8],
+ 
       [0, 4, 8],
       [2, 4, 6],
     ];
@@ -96,7 +99,7 @@ const TicTacToe = () => {
     return null;
   };
 
-  const resetGame = () => {
+  const resetScore = () => {
     setBoard(Array(9).fill(null));
     setCurrentPlayer('X');
     setLastCurrentPlayer("X");
@@ -135,64 +138,79 @@ const TicTacToe = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <Text style={[styles.header, { color: theme.headerColor }]}>
-        {board.every(e=>e===null) ? "Start Game" : winner ? `Winner: ${winner}` : isGameOver ? 'Game Drawn' : `Next Player: ${currentPlayer}`}
-      </Text>
-      <View style={styles.board}>
-        <View style={styles.row}>
-          {renderSquare(0)}
-          {renderSquare(1)}
-          {renderSquare(2)}
-        </View>
-        <View style={styles.row}>
-          {renderSquare(3)}
-          {renderSquare(4)}
-          {renderSquare(5)}
-        </View>
-        <View style={styles.row}>
-          {renderSquare(6)}
-          {renderSquare(7)}
-          {renderSquare(8)}
-        </View>
-        {renderWinnerStrike()}
-      </View>
-      
-      
-      <View style={styles.scoreContainer}>
-        <Text style={[styles.scoreTitle, { color: theme.scoreTextColor }]}>Score</Text>
-        <View style={styles.scoreTextContainer}>
-          <View style={styles.playerScore}>
-            <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.X}</Text>
-            <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player X</Text>
+    <View style={[styles.body, { backgroundColor: theme.backgroundColor }]}>
+      <TouchableOpacity style={styles.headerContainer} onPress={changeTheme}>
+        {
+          theme.name === 'dark-theme' ? (
+            <FontAwesome name="sun-o" size={24} color="white" />
+          ) : (
+            <FontAwesome name="moon-o" size={24} color="black" />
+          )
+        }
+      </TouchableOpacity>
+      <View style={styles.gameBody}>
+
+        <Text style={[styles.header, { color: theme.headerColor }]}>
+          {board.every(e=>e===null) ? "Start Game" : winner ? `Winner: ${winner}` : isGameOver ? 'Game Drawn' : `Next Player: ${currentPlayer}`}
+        </Text>
+        <View style={styles.board}>
+          <View style={styles.row}>
+            {renderSquare(0)}
+            {renderSquare(1)}
+            {renderSquare(2)}
           </View>
-          <View style={styles.playerScore}>
-            <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.O}</Text>
-            <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player O</Text>
+          <View style={styles.row}>
+            {renderSquare(3)}
+            {renderSquare(4)}
+            {renderSquare(5)}
+          </View>
+          <View style={styles.row}>
+            {renderSquare(6)}
+            {renderSquare(7)}
+            {renderSquare(8)}
+          </View>
+          {renderWinnerStrike()}
+        </View>
+        
+        
+        <View style={styles.scoreContainer}>
+          <Text style={[styles.scoreTitle, { color: theme.scoreTextColor }]}>Score</Text>
+          <View style={styles.scoreTextContainer}>
+            <View style={styles.playerScore}>
+              <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.X}</Text>
+              <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player X</Text>
+            </View>
+            <View style={styles.playerScore}>
+              <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.O}</Text>
+              <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player O</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={resetGame}>
-          <Text style={styles.buttonText}>Reset Game</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={startNewGame}>
-          <Text style={styles.buttonText}>New Game</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={changeTheme}>
-          <Text style={styles.buttonText}>Change Theme</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          {board.every(e => e === null) ? null : (
+            <TouchableOpacity style={styles.button} onPress={startNewGame}>
+              <Text style={styles.buttonText}>
+                {board.every(e => e === null) ? "New Game" : isGameOver ? "Rematch" : "New Game"}
+              </Text>
+            </TouchableOpacity>
+          )}
+          {score.X !== 0 || score.O !== 0 ? (
+            <TouchableOpacity style={[styles.button, {justifyContent: "flex-end"}]} onPress={resetScore}>
+              <Text style={styles.buttonText}>Reset Score</Text>
+            </TouchableOpacity>
+          ) : null  
+          }
+        </View>
       </View>
     </View>
+
   );
 };
 
 const themes = [
   {
-    name: 'Theme 2',
+    name: 'dark-theme',
     backgroundColor: '#282c34',
     headerColor: '#61dafb',
     squareTextColor: '#fff',
@@ -206,15 +224,26 @@ const themes = [
     backgroundColor: '#f0f0f0',
     headerColor: '#333',
     squareTextColor: '#000',
-    scoreTextColor: '#333',
+    scoreTextColor: '#000',
     modalBackgroundColor: '#fff',
     modalTextColor: '#000',
   },
-  // Add more themes as needed
 ];
 
 const styles = StyleSheet.create({
-  container: {
+  body: {
+    flex: 1,
+    width: '100%',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingLeft: 20,
+  },
+  gameBody: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -290,7 +319,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     paddingVertical: 20,
     paddingHorizontal: 60,
-    borderRadius: 10,
+    borderRadius: 10
   },
   scoreTitle: {
     fontSize: 16,
@@ -310,11 +339,12 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 14,
     fontWeight: 'bold',
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
   scoreBigText: {
     fontSize: 32,
     fontWeight: 'normal',
+    color: "#fff"
   },
 
   button: {
