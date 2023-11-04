@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { FontAwesome } from '@expo/vector-icons';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { FontAwesome } from "@expo/vector-icons";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 const TicTacToe = () => {
-  const [currentPlayer, setCurrentPlayer] = useState('X');
+  const [currentPlayer, setCurrentPlayer] = useState("X");
   const [lastCurrentPlayer, setLastCurrentPlayer] = useState("X");
   const [board, setBoard] = useState(Array(9).fill(null));
   const [winner, setWinner] = useState(null);
@@ -39,12 +39,15 @@ const TicTacToe = () => {
     if (calculatedWinner) {
       setWinner(calculatedWinner);
       setWinnerStyleStrike(calculateWinnerComboStyle(newBoard));
-      setScore((prevScore) => ({ ...prevScore, [calculatedWinner]: prevScore[calculatedWinner] + 1 }));
+      setScore((prevScore) => ({
+        ...prevScore,
+        [calculatedWinner]: prevScore[calculatedWinner] + 1,
+      }));
       setIsGameOver(true);
     } else if (newBoard.every((square) => square !== null)) {
       setIsGameOver(true);
     } else {
-      setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+      setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
     }
   };
 
@@ -60,20 +63,20 @@ const TicTacToe = () => {
       [2, 4, 6],
     ];
 
-    const winnerStyleStrikes = [
-      "H1", "H2", "H3",
-      "V1", "V2", "V3",
-      "TL", "TR"
-    ];
+    const winnerStyleStrikes = ["H1", "H2", "H3", "V1", "V2", "V3", "TL", "TR"];
 
     for (let i = 0; i < winningCombos.length; i++) {
       const [a, b, c] = winningCombos[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      if (
+        squares[a] &&
+        squares[a] === squares[b] &&
+        squares[a] === squares[c]
+      ) {
         return `winnerStrike${winnerStyleStrikes[i]}`;
       }
     }
     return "";
-  }
+  };
 
   const calculateWinner = (squares) => {
     const winningCombos = [
@@ -84,14 +87,18 @@ const TicTacToe = () => {
       [0, 3, 6],
       [1, 4, 7],
       [2, 5, 8],
- 
+
       [0, 4, 8],
       [2, 4, 6],
     ];
 
     for (let i = 0; i < winningCombos.length; i++) {
       const [a, b, c] = winningCombos[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      if (
+        squares[a] &&
+        squares[a] === squares[b] &&
+        squares[a] === squares[c]
+      ) {
         return squares[a];
       }
     }
@@ -101,7 +108,7 @@ const TicTacToe = () => {
 
   const resetScore = () => {
     setBoard(Array(9).fill(null));
-    setCurrentPlayer('X');
+    setCurrentPlayer("X");
     setLastCurrentPlayer("X");
     setScore({ X: 0, O: 0 });
     setWinnerStyleStrike("");
@@ -126,7 +133,9 @@ const TicTacToe = () => {
 
   const renderSquare = (index) => (
     <TouchableOpacity style={getStyle(index)} onPress={() => handleMove(index)}>
-      <Text style={[styles.squareText, { color: theme.squareTextColor }]}>{board[index]}</Text>
+      <Text style={[styles.squareText, { color: theme.squareTextColor }]}>
+        {board[index]}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -135,23 +144,26 @@ const TicTacToe = () => {
       return <View style={styles[winnerStyleStrike]}></View>;
     }
     return null;
-  }
+  };
 
   return (
     <View style={[styles.body, { backgroundColor: theme.backgroundColor }]}>
       <TouchableOpacity style={styles.headerContainer} onPress={changeTheme}>
-        {
-          theme.name === 'dark-theme' ? (
-            <FontAwesome name="sun-o" size={24} color="white" />
-          ) : (
-            <FontAwesome name="moon-o" size={24} color="black" />
-          )
-        }
+        {theme.name === "dark-theme" ? (
+          <FontAwesome name="sun-o" size={24} color="white" />
+        ) : (
+          <FontAwesome name="moon-o" size={24} color="black" />
+        )}
       </TouchableOpacity>
       <View style={styles.gameBody}>
-
         <Text style={[styles.header, { color: theme.headerColor }]}>
-          {board.every(e=>e===null) ? "Start Game" : winner ? `Winner: ${winner}` : isGameOver ? 'Game Drawn' : `Next Player: ${currentPlayer}`}
+          {board.every((e) => e === null)
+            ? "Start Game"
+            : winner
+            ? `Winner: ${winner}`
+            : isGameOver
+            ? "Game Drawn"
+            : `Next Player: ${currentPlayer}`}
         </Text>
         <View style={styles.board}>
           <View style={styles.row}>
@@ -171,123 +183,145 @@ const TicTacToe = () => {
           </View>
           {renderWinnerStrike()}
         </View>
-        
-        
+
         <View style={styles.scoreContainer}>
-          <Text style={[styles.scoreTitle, { color: theme.scoreTextColor }]}>Score</Text>
+          <Text style={[styles.scoreTitle, { color: theme.scoreTextColor }]}>
+            Score
+          </Text>
           <View style={styles.scoreTextContainer}>
             <View style={styles.playerScore}>
-              <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.X}</Text>
-              <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player X</Text>
+              <Text
+                style={[styles.scoreBigText, { color: theme.scoreTextColor }]}
+              >
+                {score.X}
+              </Text>
+              <Text
+                style={[styles.playerName, { color: theme.scoreTextColor }]}
+              >
+                Player X
+              </Text>
             </View>
             <View style={styles.playerScore}>
-              <Text style={[styles.scoreBigText, { color: theme.scoreTextColor }]}>{score.O}</Text>
-              <Text style={[styles.playerName, { color: theme.scoreTextColor }]}>Player O</Text>
+              <Text
+                style={[styles.scoreBigText, { color: theme.scoreTextColor }]}
+              >
+                {score.O}
+              </Text>
+              <Text
+                style={[styles.playerName, { color: theme.scoreTextColor }]}
+              >
+                Player O
+              </Text>
             </View>
           </View>
         </View>
 
         <View style={styles.buttonContainer}>
-          {board.every(e => e === null) ? null : (
+          {board.every((e) => e === null) ? null : (
             <TouchableOpacity style={styles.button} onPress={startNewGame}>
               <Text style={styles.buttonText}>
-                {board.every(e => e === null) ? "New Game" : isGameOver ? "Rematch" : "New Game"}
+                {board.every((e) => e === null)
+                  ? "New Game"
+                  : isGameOver
+                  ? "Rematch"
+                  : "New Game"}
               </Text>
             </TouchableOpacity>
           )}
           {score.X !== 0 || score.O !== 0 ? (
-            <TouchableOpacity style={[styles.button, {justifyContent: "flex-end"}]} onPress={resetScore}>
+            <TouchableOpacity
+              style={[styles.button, { justifyContent: "flex-end" }]}
+              onPress={resetScore}
+            >
               <Text style={styles.buttonText}>Reset Score</Text>
             </TouchableOpacity>
-          ) : null  
-          }
+          ) : null}
         </View>
       </View>
     </View>
-
   );
 };
 
 const themes = [
   {
-    name: 'dark-theme',
-    backgroundColor: '#282c34',
-    headerColor: '#61dafb',
-    squareTextColor: '#fff',
-    scoreTextColor: '#fff',
-    modalBackgroundColor: '#282c34',
-    modalTextColor: '#61dafb',
-    borderColor: "#fff"
+    name: "dark-theme",
+    backgroundColor: "#282c34",
+    headerColor: "#61dafb",
+    squareTextColor: "#fff",
+    scoreTextColor: "#fff",
+    modalBackgroundColor: "#282c34",
+    modalTextColor: "#61dafb",
+    borderColor: "#fff",
   },
   {
-    name: 'Theme 1',
-    backgroundColor: '#f0f0f0',
-    headerColor: '#333',
-    squareTextColor: '#000',
-    scoreTextColor: '#000',
-    modalBackgroundColor: '#fff',
-    modalTextColor: '#000',
+    name: "Theme 1",
+    backgroundColor: "#f0f0f0",
+    headerColor: "#333",
+    squareTextColor: "#000",
+    scoreTextColor: "#000",
+    modalBackgroundColor: "#fff",
+    modalTextColor: "#000",
   },
 ];
 
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingLeft: 20,
   },
   gameBody: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   board: {},
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   square: {
     width: 50,
     height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
   },
   squareText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   scoreText: {
     fontSize: 16,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 20,
-    justifyContent: 'space-around',
-    width: '80%'
+    justifyContent: "space-around",
+    width: "80%",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: "80%",
   },
   modalText: {
     fontSize: 18,
@@ -299,10 +333,10 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   themeButtonText: {
-    color: '#fff',
-    textAlign: 'center',
+    color: "#fff",
+    textAlign: "center",
   },
-  
+
   winnerStrikeH1: createWinnerStrikeStyle(0, 24),
   winnerStrikeH2: createWinnerStrikeStyle(0, 74),
   winnerStrikeH3: createWinnerStrikeStyle(0, 124),
@@ -313,38 +347,38 @@ const styles = StyleSheet.create({
   winnerStrikeTL: createWinnerStrikeStyleDiagonal(74, "-45deg"),
 
   scoreContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
     backgroundColor: "#0d8ec6",
     opacity: 0.8,
     paddingVertical: 20,
     paddingHorizontal: 60,
-    borderRadius: 10
+    borderRadius: 10,
   },
   scoreTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: -14
+    fontWeight: "bold",
+    marginTop: -14,
   },
   scoreTextContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
   },
   playerScore: {
-    alignItems: 'center',
-    fontWeight: 'normal',
+    alignItems: "center",
+    fontWeight: "normal",
     fontSize: 28,
   },
   playerName: {
     fontSize: 14,
-    fontWeight: 'bold',
-    paddingHorizontal: 20
+    fontWeight: "bold",
+    paddingHorizontal: 20,
   },
   scoreBigText: {
     fontSize: 32,
-    fontWeight: 'normal',
-    color: "#fff"
+    fontWeight: "normal",
+    color: "#fff",
   },
 
   button: {
@@ -352,15 +386,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     width: 120,
-    margin: 5, // Adjust as needed
+    margin: 5,
   },
   buttonText: {
     color: "#fff",
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-  
 });
 
 /**
