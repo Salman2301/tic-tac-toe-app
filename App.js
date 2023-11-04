@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Button } from 'react-n
 
 const TicTacToe = () => {
   const [currentPlayer, setCurrentPlayer] = useState('X');
+  const [lastCurrentPlayer, setLastCurrentPlayer ] = useState("X")
   const [board, setBoard] = useState(Array(9).fill(null));
   const [winner, setWinner] = useState(null);
   const [score, setScore] = useState({ X: 0, O: 0 });
@@ -11,7 +12,7 @@ const TicTacToe = () => {
   const [theme, setTheme] = useState(themes[0]);
 
   const getStyle = (index) => {
-    const style = [styles.square];
+    const style = [styles.square, {borderColor: theme.borderColor}];
     if (index % 3 === 2) {
       style.push({ borderRightWidth: 0 });
     }
@@ -67,12 +68,19 @@ const TicTacToe = () => {
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     setCurrentPlayer('X');
+    setLastCurrentPlayer("X");
+    setScore({ X: 0, O: 0 });
     setWinner(null);
     setIsGameOver(false);
   };
 
   const startNewGame = () => {
-    resetGame();
+    setBoard(Array(9).fill(null));
+    setWinner(null);
+    setIsGameOver(false);
+    const nextPlayer = lastCurrentPlayer  === "X" ? "O" : "X";
+    setCurrentPlayer(nextPlayer);
+    setLastCurrentPlayer(nextPlayer);
     setModalVisible(false);
   };
 
@@ -152,6 +160,7 @@ const themes = [
     scoreTextColor: '#fff',
     modalBackgroundColor: '#282c34',
     modalTextColor: '#61dafb',
+    borderColor: "#fff"
   },
   {
     name: 'Theme 1',
