@@ -1,16 +1,29 @@
 import React, { useState } from "react";
+import { Animated } from 'react-native';
 import { FontAwesome } from "@expo/vector-icons";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 const TicTacToe = () => {
+  const [theme, setTheme] = useState(themes[0]);
+
   const [currentPlayer, setCurrentPlayer] = useState("X");
   const [lastCurrentPlayer, setLastCurrentPlayer] = useState("X");
+
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [winner, setWinner] = useState(null);
   const [score, setScore] = useState({ X: 0, O: 0 });
+  const [winner, setWinner] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [theme, setTheme] = useState(themes[0]);
   const [winnerStyleStrike, setWinnerStyleStrike] = useState("");
+
+  const strikeAnimation = new Animated.Value(0);
+
+  const animateStrike = () => {
+    Animated.timing(strikeAnimation, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const getStyle = (index) => {
     const style = [styles.square, { borderColor: theme.borderColor }];
@@ -37,45 +50,19 @@ const TicTacToe = () => {
     const calculatedWinner = calculateWinner(newBoard);
 
     if (calculatedWinner) {
-      setWinner(calculatedWinner);
-      setWinnerStyleStrike(calculateWinnerComboStyle(newBoard));
+      setWinner(calculatedWinner.winner);
+      setWinnerStyleStrike(calculatedWinner.winnerStyleStrike);
       setScore((prevScore) => ({
         ...prevScore,
-        [calculatedWinner]: prevScore[calculatedWinner] + 1,
+        [calculatedWinner.winner]: prevScore[calculatedWinner.winner] + 1,
       }));
       setIsGameOver(true);
     } else if (newBoard.every((square) => square !== null)) {
+      // draw
       setIsGameOver(true);
     } else {
       setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
     }
-  };
-
-  const calculateWinnerComboStyle = (squares) => {
-    const winningCombos = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    const winnerStyleStrikes = ["H1", "H2", "H3", "V1", "V2", "V3", "TL", "TR"];
-
-    for (let i = 0; i < winningCombos.length; i++) {
-      const [a, b, c] = winningCombos[i];
-      if (
-        squares[a] &&
-        squares[a] === squares[b] &&
-        squares[a] === squares[c]
-      ) {
-        return `winnerStrike${winnerStyleStrikes[i]}`;
-      }
-    }
-    return "";
   };
 
   const calculateWinner = (squares) => {
@@ -92,6 +79,8 @@ const TicTacToe = () => {
       [2, 4, 6],
     ];
 
+    const winnerStyleStrikes = ["H1", "H2", "H3", "V1", "V2", "V3", "TL", "TR"];
+
     for (let i = 0; i < winningCombos.length; i++) {
       const [a, b, c] = winningCombos[i];
       if (
@@ -99,7 +88,7 @@ const TicTacToe = () => {
         squares[a] === squares[b] &&
         squares[a] === squares[c]
       ) {
-        return squares[a];
+        return { winner: squares[a], winnerStyleStrike: winnerStyleStrikes[i]};
       }
     }
 
@@ -112,6 +101,7 @@ const TicTacToe = () => {
     setLastCurrentPlayer("X");
     setScore({ X: 0, O: 0 });
     setWinnerStyleStrike("");
+    strikeAnimation.setValue(0);
     setWinner(null);
     setIsGameOver(false);
   };
@@ -140,32 +130,62 @@ const TicTacToe = () => {
   );
 
   const renderWinnerStrike = () => {
-    if (winnerStyleStrike) {
-      return <View style={styles[winnerStyleStrike]}></View>;
+    animateStrike();
+    const winnerStrikeName = "winnerStrike" + winnerStyleStrike;
+    const strikeStyle = styles[winnerStrikeName];
+    const interpolatedStrike = strikeAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0%", "100%"],
+    });
+
+    const animatedStrikeStyle = {
+      ...strikeStyle,
+      [["H1","H2","H3"].includes(winnerStyleStrike) ?  "width": "height"]: interpolatedStrike,
+    };
+
+    if (winnerStyleStrike === "TL") {
+      animatedStrikeStyle.transform = [ 
+        { translateX: strikeAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 74],
+        }) },
+        { translateY: 0 },
+        { rotate: "-45deg"}
+      ]
     }
-    return null;
+    else if(winnerStyleStrike === "TR") {
+      animatedStrikeStyle.transform = [ 
+        { translateX: strikeAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [150, 74],
+        }) },
+        { translateY: 0 },
+        { rotate: "45deg"}
+      ]
+    }
+    return <Animated.View style={animatedStrikeStyle}></Animated.View>;
   };
 
   return (
     <View style={[styles.body, { backgroundColor: theme.backgroundColor }]}>
       <TouchableOpacity style={styles.headerContainer} onPress={changeTheme}>
-        {theme.name === "dark-theme" ? (
-          <FontAwesome name="sun-o" size={24} color="white" />
-        ) : (
-          <FontAwesome name="moon-o" size={24} color="black" />
-        )}
+        <FontAwesome
+          name={theme.name === "dark-theme" ? "sun-o" : "moon-o"}
+          color={theme.name === "dark-theme" ? "white" : "black"}
+          size={24}
+        />
       </TouchableOpacity>
       <View style={styles.gameBody}>
         <Text style={[styles.header, { color: theme.headerColor }]}>
           {board.every((e) => e === null)
-            ? "Start Game"
+            ? `Start Game: Player ${currentPlayer}`
             : winner
-            ? `Winner: ${winner}`
+            ? `Player ${winner} Wins!!`
             : isGameOver
             ? "Game Drawn"
-            : `Next Player: ${currentPlayer}`}
+            : `Player ${currentPlayer} Turn`}
         </Text>
-        <View style={styles.board}>
+        <View>
           <View style={styles.row}>
             {renderSquare(0)}
             {renderSquare(1)}
@@ -183,7 +203,6 @@ const TicTacToe = () => {
           </View>
           {renderWinnerStrike()}
         </View>
-
         <View style={styles.scoreContainer}>
           <Text style={[styles.scoreTitle, { color: theme.scoreTextColor }]}>
             Score
@@ -220,11 +239,7 @@ const TicTacToe = () => {
           {board.every((e) => e === null) ? null : (
             <TouchableOpacity style={styles.button} onPress={startNewGame}>
               <Text style={styles.buttonText}>
-                {board.every((e) => e === null)
-                  ? "New Game"
-                  : isGameOver
-                  ? "Rematch"
-                  : "New Game"}
+                {isGameOver ? "Rematch" : "New Game"}
               </Text>
             </TouchableOpacity>
           )}
@@ -287,7 +302,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  board: {},
   row: {
     flexDirection: "row",
   },
@@ -312,6 +326,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     justifyContent: "space-around",
     width: "80%",
+    height: 50
   },
   modalContainer: {
     flex: 1,
@@ -387,6 +402,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: 120,
     margin: 5,
+    height: 40
   },
   buttonText: {
     color: "#fff",
@@ -417,7 +433,11 @@ function createWinnerStrikeStyleDiagonal(translateX, rotate) {
     width: 2,
     height: 150,
     backgroundColor: "red",
-    transform: [{ translateY: 0 }, { translateX }, { rotate }],
+    transform: [
+      { translateY: 0 },
+      { translateX },
+      { rotate }
+    ],
   };
 }
 
