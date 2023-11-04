@@ -10,13 +10,16 @@ const TicTacToe = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [theme, setTheme] = useState(themes[0]);
+  const [winnerStyleStrike, setWinnerStyleStrike] = useState("");
 
   const getStyle = (index) => {
     const style = [styles.square, {borderColor: theme.borderColor}];
     if (index % 3 === 2) {
+      //@ts-ignore
       style.push({ borderRightWidth: 0 });
     }
     if (Math.floor(index / 3) === 2) {
+      //@ts-ignore
       style.push({ borderBottomWidth: 0 });
     }
     return style;
@@ -31,10 +34,14 @@ const TicTacToe = () => {
     newBoard[index] = currentPlayer;
     setBoard(newBoard);
 
-    const winner = calculateWinner(newBoard);
-    if (winner) {
-      setWinner(winner);
-      setScore((prevScore) => ({ ...prevScore, [winner]: prevScore[winner] + 1 }));
+    const calculatedWinner = calculateWinner(newBoard);
+
+
+    if (calculatedWinner) {
+      setWinner(calculatedWinner);
+      setWinnerStyleStrike(calculateWinnerComboStyle(newBoard));
+      console.log({ calculatedWinner })
+      setScore((prevScore) => ({ ...prevScore, [calculatedWinner]: prevScore[calculatedWinner] + 1 }));
       setIsGameOver(true);
     } else if (newBoard.every((square) => square !== null)) {
       setIsGameOver(true);
@@ -43,14 +50,45 @@ const TicTacToe = () => {
     }
   };
 
+  const calculateWinnerComboStyle = (squares) => {
+    const winningCombos = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    const winnerStyleStrikes = [
+      "winnerStrikeH1", "winnerStrikeH2", "winnerStrikeH3",
+      "winnerStrikeV1", "winnerStrikeV2", "winnerStrikeV3",
+      "winnerStrikeTL", "winnerStrikeTR"
+    ]
+
+    for (let i = 0; i < winningCombos.length; i++) {
+      const [a, b, c] = winningCombos[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return winnerStyleStrikes[i];
+      }
+    }
+    return "";
+  }
+
   const calculateWinner = (squares) => {
     const winningCombos = [
       [0, 1, 2],
       [3, 4, 5],
       [6, 7, 8],
+      
       [0, 3, 6],
       [1, 4, 7],
       [2, 5, 8],
+      
       [0, 4, 8],
       [2, 4, 6],
     ];
@@ -70,6 +108,7 @@ const TicTacToe = () => {
     setCurrentPlayer('X');
     setLastCurrentPlayer("X");
     setScore({ X: 0, O: 0 });
+    setWinnerStyleStrike("");
     setWinner(null);
     setIsGameOver(false);
   };
@@ -78,6 +117,7 @@ const TicTacToe = () => {
     setBoard(Array(9).fill(null));
     setWinner(null);
     setIsGameOver(false);
+    setWinnerStyleStrike("");
     const nextPlayer = lastCurrentPlayer  === "X" ? "O" : "X";
     setCurrentPlayer(nextPlayer);
     setLastCurrentPlayer(nextPlayer);
@@ -116,6 +156,7 @@ const TicTacToe = () => {
           {renderSquare(7)}
           {renderSquare(8)}
         </View>
+        {winnerStyleStrike && <View style={styles[winnerStyleStrike]}></View>}
       </View>
       <View style={styles.scoreContainer}>
         <Text style={[styles.scoreText, { color: theme.scoreTextColor }]}>
@@ -237,6 +278,64 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
+
+  winnerStrikeH1: {
+    position: "absolute",
+    width: 150,
+    height: 2,
+    backgroundColor: "red",
+    transform: [{translateY: 24}],
+  },
+  winnerStrikeH2: {
+    position: "absolute",
+    width: 150,
+    height: 2,
+    backgroundColor: "red",
+    transform: [{translateY: 74}],
+  },
+  winnerStrikeH3: {
+    position: "absolute",
+    width: 150,
+    height: 2,
+    backgroundColor: "red",
+    transform: [{translateY: 124}],
+  },
+  winnerStrikeV1: {
+    position: "absolute",
+    width: 2,
+    height: 150,
+    backgroundColor: "red",
+    transform: [{translateX: 24}],
+  },
+  winnerStrikeV2: {
+    position: "absolute",
+    width: 2,
+    height: 150,
+    backgroundColor: "red",
+    transform: [{translateX: 74}],
+  },
+  winnerStrikeV3: {
+    position: "absolute",
+    width: 2,
+    height: 150,
+    backgroundColor: "red",
+    transform: [{translateX: 124}],
+  },
+  winnerStrikeTR: {
+    position: "absolute",
+    width: 2,
+    height: 150,
+    backgroundColor: "red",
+    transform: [{ translateY: 0 }, { translateX: 74 }, {rotate: "45deg"}],
+  },
+  winnerStrikeTL: {
+    position: "absolute",
+    width: 2,
+    height: 150,
+    backgroundColor: "red",
+    transform: [{ translateY: 0 }, { translateX: 74 }, {rotate: "-45deg"}],
+  },
+
 });
 
 export default TicTacToe;
